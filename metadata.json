@@ -1,0 +1,6 @@
+{
+  "name": "AuraHealth - Hospital Management System",
+  "description": "Modern hospital management system for patient records, doctor scheduling, appointments, and billing with Firebase Firestore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

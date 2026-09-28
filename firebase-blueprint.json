@@ -1,0 +1,163 @@
+{
+  "entities": {
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient medical and admission record in the hospital system",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full legal name of the patient",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "age": {
+          "type": "number",
+          "description": "Patient age in years"
+        },
+        "gender": {
+          "type": "string",
+          "description": "Biological or identified gender",
+          "enum": ["Male", "Female", "Other"]
+        },
+        "phone": {
+          "type": "string",
+          "description": "Primary contact phone number",
+          "maxLength": 30
+        },
+        "diagnosis": {
+          "type": "string",
+          "description": "Preliminary or confirmed medical diagnosis",
+          "maxLength": 300
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time when the patient was admitted"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Record creation timestamp"
+        }
+      },
+      "required": ["fullName", "age", "gender", "phone", "diagnosis", "admissionDate", "createdAt"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Hospital medical doctor profile and availability status",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full name and title of doctor",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "specialization": {
+          "type": "string",
+          "description": "Medical specialization field (e.g. Cardiology, Neurology)",
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "description": "Doctor hospital contact phone",
+          "maxLength": 30
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Whether doctor is currently active on duty or on leave"
+        }
+      },
+      "required": ["fullName", "specialization", "phone", "isAvailable"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Scheduled consultation between patient and doctor",
+      "type": "object",
+      "properties": {
+        "patientId": {
+          "type": "string",
+          "description": "Reference to patient document ID",
+          "maxLength": 128
+        },
+        "patientName": {
+          "type": "string",
+          "description": "Denormalized patient name for fast rendering",
+          "maxLength": 100
+        },
+        "doctorId": {
+          "type": "string",
+          "description": "Reference to doctor document ID",
+          "maxLength": 128
+        },
+        "doctorName": {
+          "type": "string",
+          "description": "Denormalized doctor name",
+          "maxLength": 100
+        },
+        "appointmentDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Scheduled appointment timestamp"
+        },
+        "status": {
+          "type": "string",
+          "description": "Appointment progress status",
+          "enum": ["Pending", "Confirmed", "Completed", "Cancelled"]
+        }
+      },
+      "required": ["patientId", "patientName", "doctorId", "doctorName", "appointmentDate", "status"]
+    },
+    "Billing": {
+      "title": "Billing",
+      "description": "Invoice and billing record for patient services",
+      "type": "object",
+      "properties": {
+        "patientId": {
+          "type": "string",
+          "description": "Reference to patient document ID",
+          "maxLength": 128
+        },
+        "patientName": {
+          "type": "string",
+          "description": "Denormalized patient name",
+          "maxLength": 100
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total billed amount in USD"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Current payment settlement status",
+          "enum": ["Paid", "Pending"]
+        },
+        "billingDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date invoice was issued"
+        }
+      },
+      "required": ["patientId", "patientName", "totalAmount", "paymentStatus", "billingDate"]
+    }
+  },
+  "firestore": {
+    "/patients/{patientId}": {
+      "schema": "#/entities/Patient",
+      "description": "Hospital patient demographic and admission records"
+    },
+    "/doctors/{doctorId}": {
+      "schema": "#/entities/Doctor",
+      "description": "Doctor directory and on-duty availability records"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "#/entities/Appointment",
+      "description": "Scheduled appointments linking patients and doctors"
+    },
+    "/billing/{billingId}": {
+      "schema": "#/entities/Billing",
+      "description": "Billing records and invoices for hospital encounters"
+    }
+  }
+}

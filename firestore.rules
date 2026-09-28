@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidPatient(data) {
+      return data.keys().hasAll(['fullName', 'age', 'gender', 'phone', 'diagnosis', 'admissionDate', 'createdAt']) &&
+             data.keys().hasOnly(['fullName', 'age', 'gender', 'phone', 'diagnosis', 'admissionDate', 'createdAt']) &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+             data.age is number && data.age >= 0 && data.age <= 150 &&
+             data.gender in ['Male', 'Female', 'Other'] &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.diagnosis is string && data.diagnosis.size() <= 300 &&
+             data.admissionDate is timestamp &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidDoctor(data) {
+      return data.keys().hasAll(['fullName', 'specialization', 'phone', 'isAvailable']) &&
+             data.keys().hasOnly(['fullName', 'specialization', 'phone', 'isAvailable']) &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+             data.specialization is string && data.specialization.size() <= 100 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.isAvailable is bool;
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['patientId', 'patientName', 'doctorId', 'doctorName', 'appointmentDate', 'status']) &&
+             data.keys().hasOnly(['patientId', 'patientName', 'doctorId', 'doctorName', 'appointmentDate', 'status']) &&
+             data.patientId is string && data.patientId.size() <= 128 &&
+             data.patientName is string && data.patientName.size() <= 100 &&
+             data.doctorId is string && data.doctorId.size() <= 128 &&
+             data.doctorName is string && data.doctorName.size() <= 100 &&
+             data.appointmentDate is timestamp &&
+             data.status in ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+    }
+
+    function isValidBilling(data) {
+      return data.keys().hasAll(['patientId', 'patientName', 'totalAmount', 'paymentStatus', 'billingDate']) &&
+             data.keys().hasOnly(['patientId', 'patientName', 'totalAmount', 'paymentStatus', 'billingDate']) &&
+             data.patientId is string && data.patientId.size() <= 128 &&
+             data.patientName is string && data.patientName.size() <= 100 &&
+             data.totalAmount is number && data.totalAmount >= 0 &&
+             data.paymentStatus in ['Paid', 'Pending'] &&
+             data.billingDate is timestamp;
+    }
+
+    // Health / Connection verification path
+    match /test/{testId} {
+      allow get: if true;
+    }
+
+    // Patients collection
+    match /patients/{patientId} {
+      allow read: if true;
+      allow create: if isValidId(patientId) && isValidPatient(incoming());
+      allow update: if isValidId(patientId) && isValidPatient(incoming());
+      allow delete: if isValidId(patientId);
+    }
+
+    // Doctors collection
+    match /doctors/{doctorId} {
+      allow read: if true;
+      allow create: if isValidId(doctorId) && isValidDoctor(incoming());
+      allow update: if isValidId(doctorId) && isValidDoctor(incoming());
+      allow delete: if isValidId(doctorId);
+    }
+
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create: if isValidId(appointmentId) && isValidAppointment(incoming());
+      allow update: if isValidId(appointmentId) && isValidAppointment(incoming());
+      allow delete: if isValidId(appointmentId);
+    }
+
+    // Billing collection
+    match /billing/{billingId} {
+      allow read: if true;
+      allow create: if isValidId(billingId) && isValidBilling(incoming());
+      allow update: if isValidId(billingId) && isValidBilling(incoming());
+      allow delete: if isValidId(billingId);
+    }
+  }
+}
