@@ -1,6 +1,6 @@
 {
-  "name": "AuraHealth - Hospital Management System",
-  "description": "Modern hospital management system for patient records, doctor scheduling, appointments, and billing with Firebase Firestore.",
+  "name": "VitaSpectra - Hospital Management System",
+  "description": "VitaSpectra modern hospital management system for patient records, doctor scheduling, appointments, and billing with Firebase.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -61,6 +61,18 @@ service cloud.firestore {
              data.billingDate is timestamp;
     }
 
+    function isValidStaffUser(data) {
+      return data.keys().hasAll(['fullName', 'email', 'role', 'roleLabel', 'department', 'employeeId', 'phone', 'status']) &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.role in ['doctor', 'nurse', 'receptionist', 'pharmacist', 'lab_technician', 'billing', 'admin'] &&
+             data.roleLabel is string && data.roleLabel.size() <= 100 &&
+             data.department is string && data.department.size() <= 100 &&
+             data.employeeId is string && data.employeeId.size() <= 50 &&
+             data.phone is string && data.phone.size() <= 30 &&
+             data.status in ['on_duty', 'active', 'on_leave'];
+    }
+
     // Health / Connection verification path
     match /test/{testId} {
       allow get: if true;
@@ -97,5 +109,14 @@ service cloud.firestore {
       allow update: if isValidId(billingId) && isValidBilling(incoming());
       allow delete: if isValidId(billingId);
     }
+
+    // Staff Users collection
+    match /staff_users/{staffId} {
+      allow read: if true;
+      allow create: if isValidId(staffId) && isValidStaffUser(incoming());
+      allow update: if isValidId(staffId) && isValidStaffUser(incoming());
+      allow delete: if isValidId(staffId);
+    }
   }
 }
+

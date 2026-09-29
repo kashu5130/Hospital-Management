@@ -11,6 +11,8 @@ import {
   subscribeDoctors,
   subscribeAppointments,
   subscribeBillings,
+  subscribeStaffUsers,
+  seedInitialStaffUsers,
   addPatient,
   updatePatient,
   deletePatient,
@@ -25,7 +27,7 @@ import {
   deleteBilling,
   seedSampleHospitalData
 } from './firebase/firestoreService';
-import { Patient, Doctor, Appointment, Billing, ActiveTab } from './types/hospital';
+import { Patient, Doctor, Appointment, Billing, StaffUser, HospitalStaffRole, ActiveTab } from './types/hospital';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
@@ -33,8 +35,23 @@ import { PatientsView } from './components/PatientsView';
 import { DoctorsView } from './components/DoctorsView';
 import { AppointmentsView } from './components/AppointmentsView';
 import { BillingView } from './components/BillingView';
+import { StaffView } from './components/StaffView';
+import { StaffAuthModal } from './components/StaffAuthModal';
 import { ConnectionModal } from './components/ConnectionModal';
-import { CheckCircle2, AlertCircle, Info, Sparkles, X } from 'lucide-react';
+import { ThemeToggle } from './components/ThemeToggle';
+import {
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  Sparkles,
+  X,
+  LayoutDashboard,
+  Users,
+  Stethoscope,
+  CalendarDays,
+  Receipt,
+  UserCheck
+} from 'lucide-react';
 
 interface Toast {
   id: string;
@@ -61,7 +78,21 @@ export default function App() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [billings, setBillings] = useState<Billing[]>([]);
+  const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Active Staff User session state (persisted in localStorage)
+  const [currentStaff, setCurrentStaff] = useState<StaffUser | null>(() => {
+    try {
+      const saved = localStorage.getItem('vitaspectra_current_staff');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [staffAuthModalOpen, setStaffAuthModalOpen] = useState<boolean>(false);
+  const [staffAuthModalMode, setStaffAuthModalMode] = useState<'login' | 'register'>('login');
+  const [staffAuthInitialRole, setStaffAuthInitialRole] = useState<HospitalStaffRole>('doctor');
 
   // Pre-fill states for cross-module booking / billing
   const [bookingPatientTarget, setBookingPatientTarget] = useState<Patient | null>(null);
@@ -81,6 +112,22 @@ export default function App() {
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);
+  };
+
+  const handleStaffLoginSuccess = (staff: StaffUser) => {
+    setCurrentStaff(staff);
+    try {
+      localStorage.setItem('vitaspectra_current_staff', JSON.stringify(staff));
+    } catch {}
+    showToast(`Welcome back, ${staff.fullName}! Active session: ${staff.roleLabel}.`, 'success');
+  };
+
+  const handleStaffLogout = () => {
+    setCurrentStaff(null);
+    try {
+      localStorage.removeItem('vitaspectra_current_staff');
+    } catch {}
+    showToast('Signed out of staff session. You can sign in with any staff type.', 'info');
   };
 
   // Perform live connection probe
@@ -149,12 +196,12 @@ export default function App() {
     };
   }, [testLiveConnection]);
 
-  // Real-time Firestore Subscriptions
+  // Real-time Firestore & Realtime Database Subscriptions
   useEffect(() => {
     let loadedCount = 0;
     const checkInitialLoad = () => {
       loadedCount++;
-      if (loadedCount >= 4) {
+      if (loadedCount >= 5) {
         setIsLoading(false);
       }
     };
@@ -207,11 +254,41 @@ export default function App() {
       }
     );
 
+    const unsubStaff = subscribeStaffUsers(
+      (data) => {
+        setStaffUsers(data);
+        // Ensure staff records in Firebase are auto-migrated to Indian names
+        seedInitialStaffUsers().catch((e) => console.error('Staff sync error:', e));
+
+        if (data.length > 0) {
+          // If no active staff selected in localStorage, default to first on-duty staff member
+          setCurrentStaff((prev) => {
+            if (!prev) {
+              const defaultStaff = data.find((s) => s.role === 'doctor') || data[0];
+              try {
+                localStorage.setItem('vitaspectra_current_staff', JSON.stringify(defaultStaff));
+              } catch {}
+              return defaultStaff;
+            }
+            // Keep current staff synchronized with latest status/details from Firebase
+            const updated = data.find((s) => s.id === prev.id);
+            return updated || prev;
+          });
+        }
+        checkInitialLoad();
+      },
+      (err) => {
+        console.error('Staff subscription error:', err);
+        checkInitialLoad();
+      }
+    );
+
     return () => {
       unsubPatients();
       unsubDoctors();
       unsubAppointments();
       unsubBillings();
+      unsubStaff();
     };
   }, []);
 
@@ -306,18 +383,28 @@ export default function App() {
           doctors: doctors.length,
           appointments: appointments.length,
           billing: billings.length,
+          staff: staffUsers.length,
         }}
         currentUser={currentUser}
+        currentStaff={currentStaff}
+        onOpenStaffAuthModal={(mode, role) => {
+          setStaffAuthModalMode(mode || 'login');
+          if (role) setStaffAuthInitialRole(role);
+          setStaffAuthModalOpen(true);
+        }}
+        onStaffLogout={handleStaffLogout}
         onSeedData={handleSeedData}
         isSeeding={isSeeding}
         connectionState={connectionState}
         onOpenConnectionModal={() => setConnectionModalOpen(true)}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -332,6 +419,11 @@ export default function App() {
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          currentStaff={currentStaff}
+          onOpenStaffAuthModal={(mode) => {
+            setStaffAuthModalMode(mode || 'login');
+            setStaffAuthModalOpen(true);
+          }}
           onOpenNewPatient={() => {
             setActiveTab('patients');
             setTriggerNewPatientModal(true);
@@ -351,6 +443,10 @@ export default function App() {
             setBillingPatientTarget(null);
             setTriggerNewBillingModal(true);
           }}
+          onOpenNewStaff={() => {
+            setStaffAuthModalMode('register');
+            setStaffAuthModalOpen(true);
+          }}
           onSeedData={handleSeedData}
           isSeeding={isSeeding}
           mobileMenuOpen={mobileMenuOpen}
@@ -362,22 +458,22 @@ export default function App() {
         />
 
         {/* View Content Body */}
-        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-28 lg:pb-8">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 space-y-3">
-              <div className="w-10 h-10 border-3 border-[#5A7865] border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs font-semibold text-[#64748B]">Connecting to Firestore database...</p>
+              <div className="w-10 h-10 border-3 border-[#5A7865] dark:border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400">Connecting to Firebase database...</p>
             </div>
           ) : (
             <>
               {/* If no data exists anywhere, show quick setup callout */}
               {patients.length === 0 && doctors.length === 0 && (
-                <div className="mb-6 p-4 rounded-2xl bg-[#EEF3EF] border border-[#D5E2D9] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div className="mb-6 p-4 rounded-2xl bg-[#EEF3EF] dark:bg-emerald-950/40 border border-[#D5E2D9] dark:border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-[#5A7865] shrink-0" />
+                    <Sparkles className="w-5 h-5 text-[#5A7865] dark:text-emerald-400 shrink-0" />
                     <div>
-                      <span className="font-bold text-[#2D3748] block">Your Firebase project (universal-75bc6) is connected!</span>
-                      <span className="text-[#64748B]">
+                      <span className="font-bold text-[#2D3748] dark:text-slate-100 block">Your Firebase project (universal-75bc6) is connected!</span>
+                      <span className="text-[#64748B] dark:text-slate-400">
                         Click "Populate Sample Data" to seed realistic clinical hospital records into your Firestore database.
                       </span>
                     </div>
@@ -399,6 +495,12 @@ export default function App() {
                   doctors={doctors}
                   appointments={appointments}
                   billings={billings}
+                  staffUsers={staffUsers}
+                  currentStaff={currentStaff}
+                  onOpenStaffAuthModal={(mode) => {
+                    setStaffAuthModalMode(mode || 'login');
+                    setStaffAuthModalOpen(true);
+                  }}
                   setActiveTab={setActiveTab}
                   onOpenNewPatient={() => {
                     setActiveTab('patients');
@@ -524,10 +626,88 @@ export default function App() {
                   onClearInitialBillingTarget={() => setBillingPatientTarget(null)}
                 />
               )}
+
+              {/* Tab: Staff Roster & Directory */}
+              {activeTab === 'staff' && (
+                <StaffView
+                  staffUsers={staffUsers}
+                  currentStaff={currentStaff}
+                  onSelectStaff={handleStaffLoginSuccess}
+                  onOpenRegisterModal={(role) => {
+                    setStaffAuthModalMode('register');
+                    if (role) setStaffAuthInitialRole(role);
+                    setStaffAuthModalOpen(true);
+                  }}
+                  onOpenLoginModal={() => {
+                    setStaffAuthModalMode('login');
+                    setStaffAuthModalOpen(true);
+                  }}
+                  showToast={showToast}
+                />
+              )}
             </>
           )}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (1-Tap Tab Switcher on Phones) */}
+        <nav
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FFFFFF]/95 dark:bg-[#111827]/95 backdrop-blur-md border-t border-[#EAE6DF] dark:border-slate-800 px-2 py-1.5 flex items-center justify-around shadow-lg transition-colors"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)' }}
+          aria-label="Mobile Navigation"
+        >
+          {[
+            { id: 'dashboard' as ActiveTab, label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'patients' as ActiveTab, label: 'Patients', icon: Users, badge: patients.length },
+            { id: 'doctors' as ActiveTab, label: 'Doctors', icon: Stethoscope, badge: doctors.length },
+            { id: 'appointments' as ActiveTab, label: 'Bookings', icon: CalendarDays, badge: appointments.length },
+            { id: 'billing' as ActiveTab, label: 'Billing', icon: Receipt, badge: billings.length },
+            { id: 'staff' as ActiveTab, label: 'Staff', icon: UserCheck, badge: staffUsers.length },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`relative flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer min-w-[50px] ${
+                  isActive
+                    ? 'text-[#5A7865] dark:text-emerald-400 font-bold'
+                    : 'text-[#64748B] dark:text-slate-400 hover:text-[#2D3748] dark:hover:text-slate-200'
+                }`}
+              >
+                <div className="relative">
+                  <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className="absolute -top-1 -right-2.5 text-[9px] font-mono font-bold px-1 rounded-full bg-[#5A7865] dark:bg-emerald-600 text-white min-w-[14px] text-center leading-tight">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] mt-0.5 tracking-tight">{item.label}</span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5A7865] dark:bg-emerald-400 mt-0.5" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
+
+      {/* Floating Theme Toggle (Hover to switch dark mode anywhere) */}
+      <ThemeToggle variant="floating" />
+
+      {/* Staff Multi-Role Authentication & Registration Modal */}
+      <StaffAuthModal
+        isOpen={staffAuthModalOpen}
+        onClose={() => setStaffAuthModalOpen(false)}
+        currentStaff={currentStaff}
+        onStaffLoginSuccess={handleStaffLoginSuccess}
+        initialMode={staffAuthModalMode}
+        initialRole={staffAuthInitialRole}
+      />
 
       {/* Connection Diagnostic Details Modal */}
       <ConnectionModal

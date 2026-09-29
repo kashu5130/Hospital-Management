@@ -3,12 +3,7 @@ import {
   CalendarDays,
   Plus,
   Clock,
-  CheckCircle2,
-  XCircle,
   Calendar,
-  AlertCircle,
-  Filter,
-  User,
   Stethoscope,
   Trash2,
   Edit3
@@ -102,8 +97,8 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
 
     setIsSubmitting(true);
     try {
-      const combinedDateTime = new Date(`${formData.appointmentDate}T${formData.appointmentTime}:00`);
-      const appointmentTimestamp = Timestamp.fromDate(combinedDateTime);
+      const dateTime = new Date(`${formData.appointmentDate}T${formData.appointmentTime}:00`);
+      const appointmentTimestamp = Timestamp.fromDate(dateTime);
 
       if (editingAppointment) {
         await onUpdateAppointment(editingAppointment.id, {
@@ -160,23 +155,23 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Top Filter and Actions Toolbar */}
       <div
-        className="bg-white rounded-2xl p-4 sm:p-5 border border-[#EAE6DF] space-y-4"
+        className="bg-white dark:bg-[#141D2B] rounded-2xl p-4 sm:p-5 border border-[#EAE6DF] dark:border-slate-800 space-y-4 transition-colors"
         style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.04)' }}
       >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-[#F9F7F2] rounded-xl border border-[#EAE6DF] overflow-x-auto w-full sm:w-auto">
+          <div className="flex items-center gap-1 p-1 bg-[#F9F7F2] dark:bg-slate-800/80 rounded-xl border border-[#EAE6DF] dark:border-slate-700 overflow-x-auto w-full sm:w-auto">
             {(['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const).map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   statusFilter === st
-                    ? 'bg-[#5A7865] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#2D3748]'
+                    ? 'bg-[#5A7865] dark:bg-emerald-600 text-white shadow-xs'
+                    : 'text-[#64748B] dark:text-slate-400 hover:text-[#2D3748] dark:hover:text-slate-200'
                 }`}
               >
                 {st}
@@ -188,7 +183,7 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
           <button
             onClick={openAddModal}
             disabled={patients.length === 0 || doctors.length === 0}
-            className="w-full sm:w-auto px-4 py-2.5 bg-[#5A7865] hover:bg-[#4A6553] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2.5 bg-[#5A7865] hover:bg-[#4A6553] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             title={
               patients.length === 0 || doctors.length === 0
                 ? 'Please add at least 1 patient and 1 doctor first'
@@ -201,18 +196,18 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
         </div>
 
         {/* Date Filter Badges */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-[#64748B] font-semibold flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-2 text-xs overflow-x-auto pb-1">
+          <span className="text-[#64748B] dark:text-slate-400 font-semibold flex items-center gap-1 shrink-0">
             <Calendar className="w-3.5 h-3.5" /> Date Frame:
           </span>
           {(['All', 'Today', 'Upcoming', 'Past'] as const).map((df) => (
             <button
               key={df}
               onClick={() => setDateFilter(df)}
-              className={`px-3 py-1 rounded-full font-medium transition-all ${
+              className={`px-3 py-1 rounded-full font-medium transition-all shrink-0 cursor-pointer ${
                 dateFilter === df
-                  ? 'bg-[#2D3748] text-white'
-                  : 'bg-[#F5F2EB] text-[#4A5568] hover:bg-[#EAE6DF]'
+                  ? 'bg-[#2D3748] dark:bg-slate-700 text-white'
+                  : 'bg-[#F5F2EB] dark:bg-slate-800 text-[#4A5568] dark:text-slate-300 hover:bg-[#EAE6DF] dark:hover:bg-slate-700'
               }`}
             >
               {df}
@@ -223,23 +218,23 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
 
       {/* Appointments List */}
       <div
-        className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden"
+        className="bg-white dark:bg-[#141D2B] rounded-2xl border border-[#EAE6DF] dark:border-slate-800 overflow-hidden transition-colors"
         style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.04)' }}
       >
-        <div className="p-5 border-b border-[#F0ECE4] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-[#F0ECE4] dark:border-slate-800 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-[#2D3748] text-base">Scheduled Encounters</h3>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <h3 className="font-bold text-[#2D3748] dark:text-slate-100 text-sm sm:text-base">Scheduled Encounters</h3>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">
               Showing {filteredAppointments.length} of {appointments.length} appointments
             </p>
           </div>
         </div>
 
         {filteredAppointments.length === 0 ? (
-          <div className="text-center py-16 bg-[#FDFBF7]">
-            <CalendarDays className="w-10 h-10 text-[#94A3B8] mx-auto mb-2" />
-            <h4 className="text-sm font-bold text-[#2D3748]">No appointments found</h4>
-            <p className="text-xs text-[#64748B] mt-1 max-w-sm mx-auto">
+          <div className="text-center py-16 bg-[#FDFBF7] dark:bg-slate-900/30">
+            <CalendarDays className="w-10 h-10 text-[#94A3B8] dark:text-slate-600 mx-auto mb-2" />
+            <h4 className="text-sm font-bold text-[#2D3748] dark:text-slate-200">No appointments found</h4>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1 max-w-sm mx-auto px-4">
               {patients.length === 0 || doctors.length === 0
                 ? 'Ensure patients and doctors are registered before booking appointments.'
                 : 'No consultations match the current filter criteria.'}
@@ -247,14 +242,14 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
             {patients.length > 0 && doctors.length > 0 && (
               <button
                 onClick={openAddModal}
-                className="mt-4 px-4 py-2 bg-[#5A7865] text-white text-xs font-semibold rounded-xl hover:bg-[#4A6553]"
+                className="mt-4 px-4 py-2 bg-[#5A7865] dark:bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-[#4A6553] cursor-pointer"
               >
                 Schedule Appointment
               </button>
             )}
           </div>
         ) : (
-          <div className="divide-y divide-[#F5F2EB]">
+          <div className="divide-y divide-[#F5F2EB] dark:divide-slate-800">
             {filteredAppointments.map((appt) => {
               const dateObj = appt.appointmentDate ? appt.appointmentDate.toDate() : null;
               const dateStr = dateObj
@@ -272,43 +267,43 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
               return (
                 <div
                   key={appt.id}
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#FDFBF7] transition-colors"
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-[#FDFBF7] dark:hover:bg-slate-850/50 transition-colors"
                 >
                   {/* Left: Patient, Doctor, Date info */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#EEF3EF] border border-[#D5E2D9] text-[#5A7865] flex flex-col items-center justify-center shrink-0">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#EEF3EF] dark:bg-emerald-950 border border-[#D5E2D9] dark:border-emerald-800/40 text-[#5A7865] dark:text-emerald-400 flex flex-col items-center justify-center shrink-0">
                       <Clock className="w-4 h-4" />
-                      <span className="text-[10px] font-bold text-[#2D3748] mt-0.5">{timeStr}</span>
+                      <span className="text-[10px] font-bold text-[#2D3748] dark:text-slate-200 mt-0.5">{timeStr}</span>
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-[#2D3748] text-sm sm:text-base">
+                        <h4 className="font-bold text-[#2D3748] dark:text-slate-100 text-sm sm:text-base">
                           {appt.patientName}
                         </h4>
                         <span
                           className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                             appt.status === 'Confirmed'
-                              ? 'bg-blue-50 text-blue-700'
+                              ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                               : appt.status === 'Completed'
-                              ? 'bg-emerald-50 text-emerald-700'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                               : appt.status === 'Cancelled'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-amber-50 text-amber-700'
+                              ? 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                              : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                           }`}
                         >
                           {appt.status}
                         </span>
                       </div>
 
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-[#64748B]">
-                        <span className="flex items-center gap-1 font-medium text-[#4A5568]">
-                          <Stethoscope className="w-3.5 h-3.5 text-[#5A7865]" />
+                      <div className="mt-1 flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#64748B] dark:text-slate-400">
+                        <span className="flex items-center gap-1 font-medium text-[#4A5568] dark:text-slate-300">
+                          <Stethoscope className="w-3.5 h-3.5 text-[#5A7865] dark:text-emerald-400" />
                           {appt.doctorName}
                         </span>
                         <span>•</span>
                         <span className="flex items-center gap-1 font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-[#64748B]" />
+                          <Calendar className="w-3.5 h-3.5 text-[#64748B] dark:text-slate-400" />
                           {dateStr}
                         </span>
                       </div>
@@ -320,7 +315,7 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                     {appt.status === 'Pending' && (
                       <button
                         onClick={() => onUpdateAppointment(appt.id, { status: 'Confirmed' })}
-                        className="px-3 py-1.5 bg-[#5A7865] hover:bg-[#4A6553] text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs"
+                        className="px-3 py-1.5 bg-[#5A7865] dark:bg-emerald-600 hover:bg-[#4A6553] text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs cursor-pointer"
                       >
                         Confirm
                       </button>
@@ -328,7 +323,7 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                     {appt.status === 'Confirmed' && (
                       <button
                         onClick={() => onUpdateAppointment(appt.id, { status: 'Completed' })}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs cursor-pointer"
                       >
                         Complete
                       </button>
@@ -336,23 +331,23 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                     {(appt.status === 'Pending' || appt.status === 'Confirmed') && (
                       <button
                         onClick={() => onUpdateAppointment(appt.id, { status: 'Cancelled' })}
-                        className="px-3 py-1.5 bg-[#F5F2EB] hover:bg-red-50 hover:text-red-700 text-[#64748B] text-xs font-semibold rounded-xl transition-colors"
+                        className="px-3 py-1.5 bg-[#F5F2EB] dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 text-[#64748B] dark:text-slate-400 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>
                     )}
 
-                    <div className="flex items-center gap-1 ml-2 border-l border-[#EAE6DF] pl-2">
+                    <div className="flex items-center gap-1 ml-2 border-l border-[#EAE6DF] dark:border-slate-800 pl-2">
                       <button
                         onClick={() => openEditModal(appt)}
-                        className="p-1.5 rounded-lg text-[#64748B] hover:text-[#2D3748] hover:bg-[#F5F2EB] transition-colors"
+                        className="p-1.5 rounded-lg text-[#64748B] dark:text-slate-400 hover:text-[#2D3748] dark:hover:text-slate-200 hover:bg-[#F5F2EB] dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         title="Reschedule / Edit appointment"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setDeleteCandidate(appt)}
-                        className="p-1.5 rounded-lg text-[#64748B] hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-1.5 rounded-lg text-[#64748B] dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                         title="Delete appointment"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -368,25 +363,25 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
 
       {/* Book / Edit Appointment Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-[#EAE6DF] shadow-2xl">
-            <h3 className="text-lg font-bold text-[#2D3748]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-[#141D2B] rounded-2xl max-w-md w-full p-5 sm:p-6 border border-[#EAE6DF] dark:border-slate-800 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-base sm:text-lg font-bold text-[#2D3748] dark:text-slate-100">
               {editingAppointment ? 'Reschedule Appointment' : 'Book Clinical Appointment'}
             </h3>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">
               Connect patient with attending physician.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            <form onSubmit={handleSubmit} className="mt-4 sm:mt-5 space-y-3.5 sm:space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#2D3748] mb-1">
+                <label className="block text-xs font-semibold text-[#2D3748] dark:text-slate-200 mb-1">
                   Select Patient *
                 </label>
                 <select
                   required
                   value={formData.patientId}
                   onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] text-sm focus:border-[#5A7865] focus:outline-hidden bg-[#FDFBF7]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] dark:border-slate-700 text-xs sm:text-sm focus:border-[#5A7865] dark:focus:border-emerald-500 focus:outline-hidden bg-[#FDFBF7] dark:bg-slate-800 text-[#2D3748] dark:text-slate-100"
                 >
                   <option value="" disabled>-- Select Admitted Patient --</option>
                   {patients.map((p) => (
@@ -398,14 +393,14 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#2D3748] mb-1">
+                <label className="block text-xs font-semibold text-[#2D3748] dark:text-slate-200 mb-1">
                   Attending Doctor *
                 </label>
                 <select
                   required
                   value={formData.doctorId}
                   onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] text-sm focus:border-[#5A7865] focus:outline-hidden bg-[#FDFBF7]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] dark:border-slate-700 text-xs sm:text-sm focus:border-[#5A7865] dark:focus:border-emerald-500 focus:outline-hidden bg-[#FDFBF7] dark:bg-slate-800 text-[#2D3748] dark:text-slate-100"
                 >
                   <option value="" disabled>-- Select Doctor --</option>
                   {doctors.map((d) => (
@@ -416,9 +411,9 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#2D3748] mb-1">
+                  <label className="block text-xs font-semibold text-[#2D3748] dark:text-slate-200 mb-1">
                     Date *
                   </label>
                   <input
@@ -426,11 +421,11 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                     required
                     value={formData.appointmentDate}
                     onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] text-sm focus:border-[#5A7865] focus:outline-hidden bg-[#FDFBF7]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] dark:border-slate-700 text-xs sm:text-sm focus:border-[#5A7865] dark:focus:border-emerald-500 focus:outline-hidden bg-[#FDFBF7] dark:bg-slate-800 text-[#2D3748] dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#2D3748] mb-1">
+                  <label className="block text-xs font-semibold text-[#2D3748] dark:text-slate-200 mb-1">
                     Time *
                   </label>
                   <input
@@ -438,19 +433,19 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                     required
                     value={formData.appointmentTime}
                     onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] text-sm focus:border-[#5A7865] focus:outline-hidden bg-[#FDFBF7]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] dark:border-slate-700 text-xs sm:text-sm focus:border-[#5A7865] dark:focus:border-emerald-500 focus:outline-hidden bg-[#FDFBF7] dark:bg-slate-800 text-[#2D3748] dark:text-slate-100"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#2D3748] mb-1">
+                <label className="block text-xs font-semibold text-[#2D3748] dark:text-slate-200 mb-1">
                   Initial Status *
                 </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as AppointmentStatus })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] text-sm focus:border-[#5A7865] focus:outline-hidden bg-[#FDFBF7]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE6DF] dark:border-slate-700 text-xs sm:text-sm focus:border-[#5A7865] dark:focus:border-emerald-500 focus:outline-hidden bg-[#FDFBF7] dark:bg-slate-800 text-[#2D3748] dark:text-slate-100"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Confirmed">Confirmed</option>
@@ -459,21 +454,21 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#F0ECE4]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F0ECE4] dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => {
                     setIsModalOpen(false);
                     onClearInitialBookingTargets?.();
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#64748B] hover:bg-[#F5F2EB]"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#64748B] dark:text-slate-400 hover:bg-[#F5F2EB] dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#5A7865] hover:bg-[#4A6553] shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#5A7865] dark:bg-emerald-600 hover:bg-[#4A6553] shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? 'Booking...' : editingAppointment ? 'Update Schedule' : 'Schedule Appointment'}
                 </button>
@@ -485,17 +480,17 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
 
       {/* Delete Confirmation Modal */}
       {deleteCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 border border-[#EAE6DF] shadow-2xl">
-            <h3 className="text-base font-bold text-red-600">Delete Appointment?</h3>
-            <p className="text-xs text-[#64748B] mt-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#141D2B] rounded-2xl max-w-sm w-full p-6 border border-[#EAE6DF] dark:border-slate-800 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-base font-bold text-red-600 dark:text-red-400">Delete Appointment?</h3>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-2">
               Remove consultation between <strong>{deleteCandidate.patientName}</strong> and{' '}
               <strong>{deleteCandidate.doctorName}</strong>?
             </p>
             <div className="mt-5 flex items-center justify-end gap-2.5">
               <button
                 onClick={() => setDeleteCandidate(null)}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#64748B] hover:bg-[#F5F2EB]"
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#64748B] dark:text-slate-400 hover:bg-[#F5F2EB] dark:hover:bg-slate-800 cursor-pointer"
               >
                 Cancel
               </button>
@@ -504,7 +499,7 @@ export const AppointmentsView: React.FC<AppointmentsViewProps> = ({
                   await onDeleteAppointment(deleteCandidate.id);
                   setDeleteCandidate(null);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs cursor-pointer"
               >
                 Delete Encounter
               </button>

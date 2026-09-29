@@ -140,6 +140,70 @@
         }
       },
       "required": ["patientId", "patientName", "totalAmount", "paymentStatus", "billingDate"]
+    },
+    "StaffUser": {
+      "title": "StaffUser",
+      "description": "Hospital staff account record categorized by staff type with credentials and duty status",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full legal name of staff member",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "description": "Staff work email address",
+          "maxLength": 100
+        },
+        "role": {
+          "type": "string",
+          "description": "Hospital staff role type",
+          "enum": ["doctor", "nurse", "receptionist", "pharmacist", "lab_technician", "billing", "admin"]
+        },
+        "roleLabel": {
+          "type": "string",
+          "description": "Human-readable title of staff role",
+          "maxLength": 100
+        },
+        "department": {
+          "type": "string",
+          "description": "Hospital department or clinical wing",
+          "maxLength": 100
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Badge code or medical license identifier",
+          "maxLength": 50
+        },
+        "phone": {
+          "type": "string",
+          "description": "Staff contact phone number",
+          "maxLength": 30
+        },
+        "shift": {
+          "type": "string",
+          "description": "Assigned duty shift",
+          "maxLength": 50
+        },
+        "status": {
+          "type": "string",
+          "description": "Operational availability status",
+          "enum": ["on_duty", "active", "on_leave"]
+        },
+        "password": {
+          "type": "string",
+          "description": "Staff account credential passcode or hashed password",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account registration timestamp"
+        }
+      },
+      "required": ["fullName", "email", "role", "roleLabel", "department", "employeeId", "phone", "status"]
     }
   },
   "firestore": {
@@ -158,6 +222,10 @@
     "/billing/{billingId}": {
       "schema": "#/entities/Billing",
       "description": "Billing records and invoices for hospital encounters"
+    },
+    "/staff_users/{staffId}": {
+      "schema": "#/entities/StaffUser",
+      "description": "Hospital staff authentication, role access, and profile records"
     }
   }
 }

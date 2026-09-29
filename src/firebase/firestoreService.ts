@@ -8,7 +8,7 @@ import {
   onValue
 } from 'firebase/database';
 import { rtdb, handleFirestoreError, OperationType } from './config';
-import { Patient, Doctor, Appointment, Billing, toDateObject } from '../types/hospital';
+import { Patient, Doctor, Appointment, Billing, StaffUser, HospitalStaffRole, toDateObject } from '../types/hospital';
 
 // Helper to sanitize dates for Firebase Realtime Database
 const serializeDate = (dateVal: any): number => {
@@ -410,39 +410,51 @@ export const seedSampleHospitalData = async (): Promise<{
   doctorsCount: number;
   appointmentsCount: number;
   billingCount: number;
+  staffCount: number;
 }> => {
   const now = Date.now();
 
-  // Sample Doctors
+  // Clear existing records for clean Indian names migration
+  try {
+    await remove(ref(rtdb, 'patients'));
+    await remove(ref(rtdb, 'doctors'));
+    await remove(ref(rtdb, 'appointments'));
+    await remove(ref(rtdb, 'billing'));
+    await remove(ref(rtdb, 'staff_users'));
+  } catch (e) {
+    console.warn('Cleared existing records before seeding:', e);
+  }
+
+  // Sample Doctors with Indian names
   const doctorsData: Omit<Doctor, 'id'>[] = [
     {
-      fullName: 'Dr. Sarah Jenkins, MD',
+      fullName: 'Dr. Rajesh Sharma, MD',
       specialization: 'Cardiology',
-      phone: '+1 (555) 234-8901',
+      phone: '+91 98201 23456',
       isAvailable: true,
     },
     {
-      fullName: 'Dr. Marcus Vance, DO',
+      fullName: 'Dr. Priya Venkatesh, MD',
       specialization: 'Neurology',
-      phone: '+1 (555) 456-7812',
+      phone: '+91 98334 55667',
       isAvailable: true,
     },
     {
-      fullName: 'Dr. Elena Rostova, MD',
+      fullName: 'Dr. Arjun Kapoor, MD',
       specialization: 'Pediatrics',
-      phone: '+1 (555) 789-0123',
+      phone: '+91 98445 66778',
       isAvailable: false,
     },
     {
-      fullName: 'Dr. David Chen, MD',
+      fullName: 'Dr. Sunita Sen, MS',
       specialization: 'Orthopedics',
-      phone: '+1 (555) 345-6789',
+      phone: '+91 98556 77889',
       isAvailable: true,
     },
     {
-      fullName: 'Dr. Amara Patel, MD',
+      fullName: 'Dr. Amit Patel, MD',
       specialization: 'General Medicine',
-      phone: '+1 (555) 890-1234',
+      phone: '+91 98667 88990',
       isAvailable: true,
     },
   ];
@@ -453,49 +465,49 @@ export const seedSampleHospitalData = async (): Promise<{
     doctorIds.push(id);
   }
 
-  // Sample Patients
+  // Sample Patients with Indian names
   const patientsData: Omit<Patient, 'id'>[] = [
     {
-      fullName: 'Eleanor Vance',
+      fullName: 'Aarav Sharma',
       age: 48,
-      gender: 'Female',
-      phone: '+1 (555) 901-2345',
+      gender: 'Male',
+      phone: '+91 98701 11223',
       diagnosis: 'Hypertensive heart disease & mild arrhythmia',
       admissionDate: toDateObject(now - 3 * 24 * 3600 * 1000),
       createdAt: toDateObject(now - 3 * 24 * 3600 * 1000),
     },
     {
-      fullName: 'Lucas Ramirez',
+      fullName: 'Deepak Verma',
       age: 34,
       gender: 'Male',
-      phone: '+1 (555) 678-9012',
+      phone: '+91 98702 22334',
       diagnosis: 'Acute lumbar strain and disc herniation',
       admissionDate: toDateObject(now - 1 * 24 * 3600 * 1000),
       createdAt: toDateObject(now - 1 * 24 * 3600 * 1000),
     },
     {
-      fullName: 'Sophia Nguyen',
+      fullName: 'Ananya Iyer',
       age: 9,
       gender: 'Female',
-      phone: '+1 (555) 432-1098',
+      phone: '+91 98703 33445',
       diagnosis: 'Seasonal bronchial asthma exacerbation',
       admissionDate: toDateObject(now - 5 * 24 * 3600 * 1000),
       createdAt: toDateObject(now - 5 * 24 * 3600 * 1000),
     },
     {
-      fullName: 'Arthur Pendelton',
+      fullName: 'Rameshchandra Gupta',
       age: 72,
       gender: 'Male',
-      phone: '+1 (555) 876-5432',
+      phone: '+91 98704 44556',
       diagnosis: 'Post-operative monitoring after hip arthroplasty',
       admissionDate: toDateObject(now - 7 * 24 * 3600 * 1000),
       createdAt: toDateObject(now - 7 * 24 * 3600 * 1000),
     },
     {
-      fullName: 'Jordan Miller',
+      fullName: 'Kavita Reddy',
       age: 27,
-      gender: 'Other',
-      phone: '+1 (555) 321-0987',
+      gender: 'Female',
+      phone: '+91 98705 55667',
       diagnosis: 'Chronic migraine with visual aura',
       admissionDate: toDateObject(now - 2 * 24 * 3600 * 1000),
       createdAt: toDateObject(now - 2 * 24 * 3600 * 1000),
@@ -508,7 +520,7 @@ export const seedSampleHospitalData = async (): Promise<{
     patientIds.push(id);
   }
 
-  // Sample Appointments
+  // Sample Appointments with Indian names
   const appointmentsData: Omit<Appointment, 'id'>[] = [
     {
       patientId: patientIds[0],
@@ -556,7 +568,7 @@ export const seedSampleHospitalData = async (): Promise<{
     await addAppointment(appt);
   }
 
-  // Sample Billing Invoices
+  // Sample Billing Invoices with Indian patient names
   const billingData: Omit<Billing, 'id'>[] = [
     {
       patientId: patientIds[0],
@@ -599,10 +611,307 @@ export const seedSampleHospitalData = async (): Promise<{
     await addBilling(bill);
   }
 
+  // Also seed initial staff members for every hospital staff type
+  const staff = await seedInitialStaffUsers(true);
+
   return {
     patientsCount: patientsData.length,
     doctorsCount: doctorsData.length,
     appointmentsCount: appointmentsData.length,
     billingCount: billingData.length,
+    staffCount: staff.length,
   };
 };
+
+// ==================== HOSPITAL STAFF USERS CRUD ====================
+export const getStaffUsers = async (): Promise<StaffUser[]> => {
+  const path = 'staff_users';
+  try {
+    const staffRef = ref(rtdb, path);
+    const snapshot = await get(staffRef);
+    if (!snapshot.exists()) return [];
+
+    const data = snapshot.val();
+    return Object.keys(data).map((key) => ({
+      id: key,
+      ...data[key],
+      createdAt: toDateObject(data[key].createdAt),
+      lastLoginAt: data[key].lastLoginAt ? toDateObject(data[key].lastLoginAt) : undefined,
+    })) as StaffUser[];
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+  }
+};
+
+export const subscribeStaffUsers = (
+  onData: (staff: StaffUser[]) => void,
+  onError?: (err: Error) => void
+) => {
+  const path = 'staff_users';
+  const staffRef = ref(rtdb, path);
+
+  return onValue(
+    staffRef,
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        onData([]);
+        return;
+      }
+      const data = snapshot.val();
+      const list: StaffUser[] = Object.keys(data).map((key) => ({
+        id: key,
+        ...data[key],
+        createdAt: toDateObject(data[key].createdAt),
+        lastLoginAt: data[key].lastLoginAt ? toDateObject(data[key].lastLoginAt) : undefined,
+      }));
+      // Sort newest or by role
+      list.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+      onData(list);
+    },
+    (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
+      onError?.(error as Error);
+    }
+  );
+};
+
+export const addStaffUser = async (
+  staff: Omit<StaffUser, 'id'>,
+  customId?: string
+): Promise<string> => {
+  const path = 'staff_users';
+  try {
+    let targetRef;
+    let id: string;
+
+    if (customId) {
+      targetRef = ref(rtdb, `${path}/${customId}`);
+      id = customId;
+    } else {
+      const staffRef = ref(rtdb, path);
+      targetRef = push(staffRef);
+      id = targetRef.key!;
+    }
+
+    const payload = {
+      fullName: staff.fullName,
+      email: staff.email.toLowerCase().trim(),
+      role: staff.role,
+      roleLabel: staff.roleLabel,
+      department: staff.department,
+      employeeId: staff.employeeId.toUpperCase().trim(),
+      phone: staff.phone,
+      shift: staff.shift || 'General (09:00 - 17:00)',
+      status: staff.status || 'on_duty',
+      password: staff.password || 'password123',
+      avatarUrl: staff.avatarUrl || '',
+      specialization: staff.specialization || '',
+      createdAt: serializeDate(staff.createdAt || Date.now()),
+      lastLoginAt: serializeDate(Date.now()),
+    };
+
+    await set(targetRef, payload);
+    return id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+};
+
+export const updateStaffUser = async (
+  id: string,
+  updates: Partial<StaffUser>
+): Promise<void> => {
+  const path = `staff_users/${id}`;
+  try {
+    const itemRef = ref(rtdb, path);
+    const serializedUpdates: any = { ...updates };
+
+    if (updates.email) {
+      serializedUpdates.email = updates.email.toLowerCase().trim();
+    }
+    if (updates.employeeId) {
+      serializedUpdates.employeeId = updates.employeeId.toUpperCase().trim();
+    }
+    if (updates.createdAt) {
+      serializedUpdates.createdAt = serializeDate(updates.createdAt);
+    }
+    if (updates.lastLoginAt) {
+      serializedUpdates.lastLoginAt = serializeDate(updates.lastLoginAt);
+    }
+
+    await update(itemRef, serializedUpdates);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+};
+
+export const deleteStaffUser = async (id: string): Promise<void> => {
+  const path = `staff_users/${id}`;
+  try {
+    const itemRef = ref(rtdb, path);
+    await remove(itemRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+};
+
+// Authenticate staff by email or employee ID
+export const authenticateStaffUser = async (
+  identifier: string,
+  password?: string
+): Promise<StaffUser | null> => {
+  const cleanId = identifier.trim().toLowerCase();
+  const staff = await getStaffUsers();
+
+  const found = staff.find(
+    (s) =>
+      s.email.toLowerCase() === cleanId ||
+      s.employeeId.toLowerCase() === cleanId
+  );
+
+  if (!found) {
+    throw new Error(`No hospital staff record found for "${identifier}". Please check your email or employee badge ID.`);
+  }
+
+  if (password && found.password && found.password !== password) {
+    throw new Error('Incorrect staff passcode or password. Please try again.');
+  }
+
+  // Update last login timestamp in background
+  updateStaffUser(found.id, { lastLoginAt: toDateObject(Date.now()), status: 'on_duty' }).catch(() => {});
+
+  return {
+    ...found,
+    status: 'on_duty',
+    lastLoginAt: toDateObject(Date.now()),
+  };
+};
+
+// Default seed records for every hospital staff type with Indian names
+export const INITIAL_STAFF_MEMBERS: Omit<StaffUser, 'id'>[] = [
+  {
+    fullName: 'Dr. Rajesh Sharma, MD',
+    email: 'rajesh.sharma@vitaspectra.health',
+    role: 'doctor',
+    roleLabel: 'Doctor / Physician',
+    department: 'Cardiology',
+    employeeId: 'DOC-101',
+    phone: '+91 98201 23456',
+    shift: 'Morning (08:00 - 16:00)',
+    status: 'on_duty',
+    specialization: 'Cardiovascular Surgery',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 120 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Pooja Nair, BSN RN',
+    email: 'pooja.nair@vitaspectra.health',
+    role: 'nurse',
+    roleLabel: 'Clinical Nurse',
+    department: 'ICU & Critical Care',
+    employeeId: 'NUR-204',
+    phone: '+91 98312 34567',
+    shift: 'Morning (08:00 - 16:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 90 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Rohan Verma',
+    email: 'rohan.verma@vitaspectra.health',
+    role: 'receptionist',
+    roleLabel: 'Receptionist / Front Desk',
+    department: 'Main Front Desk',
+    employeeId: 'REC-302',
+    phone: '+91 98453 45678',
+    shift: 'General (09:00 - 17:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 60 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Ananya Deshmukh, M.Pharm',
+    email: 'ananya.deshmukh@vitaspectra.health',
+    role: 'pharmacist',
+    roleLabel: 'Clinical Pharmacist',
+    department: 'Central Hospital Pharmacy',
+    employeeId: 'PHARM-401',
+    phone: '+91 98765 43210',
+    shift: 'General (09:00 - 17:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 45 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Dr. Vikram Malhotra, PhD',
+    email: 'vikram.malhotra@vitaspectra.health',
+    role: 'lab_technician',
+    roleLabel: 'Laboratory Technician',
+    department: 'Clinical Pathology & Hematology',
+    employeeId: 'LAB-502',
+    phone: '+91 98111 22334',
+    shift: 'Morning (08:00 - 16:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 40 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Suresh Iyer',
+    email: 'suresh.iyer@vitaspectra.health',
+    role: 'billing',
+    roleLabel: 'Billing & Finance Officer',
+    department: 'Patient Accounts Office',
+    employeeId: 'BILL-601',
+    phone: '+91 98920 33445',
+    shift: 'General (09:00 - 17:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 30 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+  {
+    fullName: 'Sunita Mehra, MHA',
+    email: 'sunita.mehra@vitaspectra.health',
+    role: 'admin',
+    roleLabel: 'Hospital Administrator',
+    department: 'Hospital Executive Directorate',
+    employeeId: 'ADM-001',
+    phone: '+91 98100 99887',
+    shift: 'General (09:00 - 17:00)',
+    status: 'on_duty',
+    password: 'password123',
+    createdAt: toDateObject(Date.now() - 150 * 24 * 3600 * 1000),
+    lastLoginAt: toDateObject(Date.now()),
+  },
+];
+
+// Ensure initial staff records exist in Firebase for all staff types
+export const seedInitialStaffUsers = async (forceOverwrite: boolean = false): Promise<StaffUser[]> => {
+  const existing = await getStaffUsers();
+  const hasOldNames = existing.some(
+    (s) =>
+      s.fullName.includes('Vance') ||
+      s.fullName.includes('Rostova') ||
+      s.fullName.includes('Kalu') ||
+      s.fullName.includes('Bennett')
+  );
+
+  if (!forceOverwrite && existing && existing.length > 0 && !hasOldNames) {
+    return existing;
+  }
+
+  const createdStaff: StaffUser[] = [];
+  for (const staff of INITIAL_STAFF_MEMBERS) {
+    const id = staff.employeeId.toLowerCase();
+    await addStaffUser(staff, id);
+    createdStaff.push({ id, ...staff });
+  }
+
+  return createdStaff;
+};
+

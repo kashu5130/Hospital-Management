@@ -70,4 +70,41 @@ export interface Billing {
   billingDate: DateLike;
 }
 
-export type ActiveTab = 'dashboard' | 'patients' | 'doctors' | 'appointments' | 'billing';
+export type HospitalStaffRole =
+  | 'doctor'
+  | 'nurse'
+  | 'receptionist'
+  | 'pharmacist'
+  | 'lab_technician'
+  | 'billing'
+  | 'admin';
+
+export type StaffStatus = 'on_duty' | 'active' | 'on_leave';
+
+export type StaffShift =
+  | 'Morning (08:00 - 16:00)'
+  | 'Evening (16:00 - 00:00)'
+  | 'Night (00:00 - 08:00)'
+  | 'General (09:00 - 17:00)'
+  | 'On-Call (Emergency)';
+
+export interface StaffUser {
+  id: string;
+  fullName: string;
+  email: string;
+  role: HospitalStaffRole;
+  roleLabel: string;
+  department: string;
+  employeeId: string;
+  phone: string;
+  shift: string;
+  status: StaffStatus;
+  password?: string;
+  avatarUrl?: string;
+  specialization?: string;
+  createdAt: DateLike;
+  lastLoginAt?: DateLike;
+}
+
+export type ActiveTab = 'dashboard' | 'patients' | 'doctors' | 'appointments' | 'billing' | 'staff';
+
