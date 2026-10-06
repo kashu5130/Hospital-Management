@@ -124,7 +124,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Decorative backdrop shape */}
-        <div className="absolute right-0 top-0 bottom-0 w-80 bg-white/5 rounded-full -mr-20 -mt-20 blur-2xl pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-80 bg-white/5 rounded-full -mr-20 -mt-20 blur-2xl pointer-events-none dark:hidden" />
       </div>
 
       {/* Top 4 Summary Metric Cards */}

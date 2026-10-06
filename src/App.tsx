@@ -39,6 +39,7 @@ import { StaffView } from './components/StaffView';
 import { StaffAuthModal } from './components/StaffAuthModal';
 import { ConnectionModal } from './components/ConnectionModal';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Footer } from './components/Footer';
 import {
   CheckCircle2,
   AlertCircle,
@@ -339,7 +340,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#2D3748] flex flex-col antialiased">
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#090D14] text-[#2D3748] dark:text-[#F8FAFC] flex flex-col antialiased">
       {/* Toast Notification Container */}
       <div className="fixed top-5 right-5 z-50 space-y-2 max-w-sm pointer-events-none">
         {toasts.map((toast) => (
@@ -347,21 +348,21 @@ export default function App() {
             key={toast.id}
             className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-2xl shadow-xl border text-xs font-semibold backdrop-blur-md transition-all animate-in slide-in-from-top-2 ${
               toast.type === 'success'
-                ? 'bg-emerald-50/95 text-emerald-800 border-emerald-200'
+                ? 'bg-emerald-50/95 dark:bg-[#0C241B] text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                 : toast.type === 'error'
-                ? 'bg-red-50/95 text-red-800 border-red-200'
-                : 'bg-blue-50/95 text-blue-800 border-blue-200'
+                ? 'bg-red-50/95 dark:bg-[#2A0E14] text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
+                : 'bg-blue-50/95 dark:bg-[#0E1E36] text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800'
             }`}
           >
             <div className="flex items-center gap-2">
-              {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
-              {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />}
-              {toast.type === 'info' && <Info className="w-4 h-4 text-blue-600 shrink-0" />}
+              {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />}
+              {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />}
+              {toast.type === 'info' && <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />}
               <span>{toast.message}</span>
             </div>
             <button
               onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-              className="text-[#94A3B8] hover:text-[#2D3748] p-0.5"
+              className="text-[#94A3B8] hover:text-[#2D3748] dark:hover:text-slate-200 p-0.5 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -649,6 +650,26 @@ export default function App() {
           )}
         </main>
 
+        {/* Global Hospital Footer */}
+        <Footer
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentStaff={currentStaff}
+          onOpenStaffAuthModal={(mode) => {
+            setStaffAuthModalMode(mode || 'login');
+            setStaffAuthModalOpen(true);
+          }}
+          connectionState={connectionState}
+          onOpenConnectionModal={() => setConnectionModalOpen(true)}
+          onSeedSampleData={handleSeedData}
+          isSeeding={isSeeding}
+          patientsCount={patients.length}
+          doctorsCount={doctors.length}
+          appointmentsCount={appointments.length}
+          billingsCount={billings.length}
+          staffCount={staffUsers.length}
+        />
+
         {/* Mobile Bottom Navigation Bar (1-Tap Tab Switcher on Phones) */}
         <nav
           className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FFFFFF]/95 dark:bg-[#111827]/95 backdrop-blur-md border-t border-[#EAE6DF] dark:border-slate-800 px-2 py-1.5 flex items-center justify-around shadow-lg transition-colors"
@@ -696,7 +717,7 @@ export default function App() {
         </nav>
       </div>
 
-      {/* Floating Theme Toggle (Hover to switch dark mode anywhere) */}
+      {/* Floating Theme Toggle (1-Click button toggle) */}
       <ThemeToggle variant="floating" />
 
       {/* Staff Multi-Role Authentication & Registration Modal */}

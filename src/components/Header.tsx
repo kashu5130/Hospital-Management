@@ -150,8 +150,8 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* THEME TOGGLE (Hover to change dark mode as requested) */}
-          <ThemeToggle variant="compact" showHoverHint={true} />
+          {/* THEME TOGGLE (1-Click button toggle) */}
+          <ThemeToggle variant="compact" />
 
           {/* Live Firebase Connection Badge */}
           <button

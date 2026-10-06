@@ -4,118 +4,173 @@
 
 @layer base {
   :root {
-    --bg-cream: #FDFBF7;
+    --bg-canvas: #FDFBF7;
     --bg-card: #FFFFFF;
+    --bg-card-subtle: #F9F7F2;
+    --bg-card-hover: #F3EFE6;
+    --bg-input: #FFFFFF;
     --accent-sage: #5A7865;
     --accent-sage-hover: #4A6553;
     --accent-sage-light: #EEF3EF;
-    --text-charcoal: #2D3748;
+    --text-primary: #1E293B;
+    --text-secondary: #475569;
     --text-muted: #64748B;
     --border-soft: #EAE6DF;
-    --glow-color: rgba(90, 120, 101, 0.2);
-    --glow-highlight: rgba(90, 120, 101, 0.4);
+    --border-subtle: #F0ECE4;
     --theme-accent: #5A7865;
+    --theme-accent-hover: #4A6553;
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   }
 
-  /* Default Dark: Midnight Obsidian & Bio-Emerald */
+  /* Default Dark: Midnight Obsidian & Emerald - Deep, solid, clean with NO light spots */
   html.dark, .dark {
-    --bg-cream: #090D16;
-    --bg-card: #111827;
+    --bg-canvas: #090D14;
+    --bg-card: #0F1624;
+    --bg-card-subtle: #141C2E;
+    --bg-card-hover: #18233A;
+    --bg-input: #0B101B;
     --accent-sage: #10B981;
     --accent-sage-hover: #059669;
     --accent-sage-light: #064E3B;
-    --text-charcoal: #F8FAFC;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
     --text-muted: #94A3B8;
     --border-soft: #1E293B;
-    --glow-color: rgba(16, 185, 129, 0.28);
-    --glow-highlight: rgba(52, 211, 153, 0.5);
+    --border-subtle: #172033;
     --theme-accent: #10B981;
+    --theme-accent-hover: #059669;
+    --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
   }
 
   /* Style Variant: Cyber Bio-Teal */
   html.dark.dark-cyber-teal, .dark.dark-cyber-teal {
-    --bg-cream: #060D17;
-    --bg-card: #0D1929;
+    --bg-canvas: #060D17;
+    --bg-card: #0C1728;
+    --bg-card-subtle: #102036;
+    --bg-card-hover: #142842;
+    --bg-input: #081220;
     --accent-sage: #06B6D4;
     --accent-sage-hover: #0891B2;
     --accent-sage-light: #164E63;
-    --text-charcoal: #F0FDF4;
+    --text-primary: #F0FDF4;
+    --text-secondary: #CFFAFE;
     --text-muted: #94A3B8;
     --border-soft: #152E44;
-    --glow-color: rgba(6, 182, 212, 0.32);
-    --glow-highlight: rgba(34, 211, 238, 0.55);
+    --border-subtle: #0F2234;
     --theme-accent: #06B6D4;
+    --theme-accent-hover: #0891B2;
+    --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
   }
 
   /* Style Variant: Midnight Sapphire */
   html.dark.dark-midnight-navy, .dark.dark-midnight-navy {
-    --bg-cream: #080C1A;
-    --bg-card: #101730;
+    --bg-canvas: #070C1A;
+    --bg-card: #0E1630;
+    --bg-card-subtle: #131E40;
+    --bg-card-hover: #17244D;
+    --bg-input: #0A1024;
     --accent-sage: #38BDF8;
     --accent-sage-hover: #0284C7;
     --accent-sage-light: #0C4A6E;
-    --text-charcoal: #F8FAFC;
+    --text-primary: #F8FAFC;
+    --text-secondary: #E0F2FE;
     --text-muted: #94A3B8;
-    --border-soft: #1E2850;
-    --glow-color: rgba(56, 189, 248, 0.3);
-    --glow-highlight: rgba(125, 211, 252, 0.55);
+    --border-soft: #1C274E;
+    --border-subtle: #151F3E;
     --theme-accent: #38BDF8;
+    --theme-accent-hover: #0284C7;
+    --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
   }
 
   /* Style Variant: Royal Amethyst */
   html.dark.dark-royal-amethyst, .dark.dark-royal-amethyst {
-    --bg-cream: #0C0A1A;
-    --bg-card: #15122B;
+    --bg-canvas: #0A0718;
+    --bg-card: #130E2A;
+    --bg-card-subtle: #1A1439;
+    --bg-card-hover: #221A4A;
+    --bg-input: #0D091F;
     --accent-sage: #A855F7;
     --accent-sage-hover: #9333EA;
     --accent-sage-light: #3B0764;
-    --text-charcoal: #FAF5FF;
+    --text-primary: #FAF5FF;
+    --text-secondary: #F3E8FF;
     --text-muted: #A8A29E;
-    --border-soft: #27204E;
-    --glow-color: rgba(168, 85, 247, 0.32);
-    --glow-highlight: rgba(192, 132, 252, 0.55);
+    --border-soft: #261D4C;
+    --border-subtle: #1C153A;
     --theme-accent: #A855F7;
+    --theme-accent-hover: #9333EA;
+    --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
   }
 
   body {
-    background-color: var(--bg-cream);
-    color: var(--text-charcoal);
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease, border-color 0.3s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
-  /* Ambient atmospheric background glows for modern dark mode depth */
+  /* Solid dark background without any blurry light spots or radial gradients */
   .dark body {
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.12), transparent 70%),
-      radial-gradient(circle at 100% 100%, rgba(15, 23, 42, 0.8), transparent);
-    background-attachment: fixed;
-  }
-
-  .dark.dark-cyber-teal body {
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6, 182, 212, 0.14), transparent 70%),
-      radial-gradient(circle at 100% 100%, rgba(13, 25, 41, 0.8), transparent);
-    background-attachment: fixed;
-  }
-
-  .dark.dark-midnight-navy body {
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.13), transparent 70%),
-      radial-gradient(circle at 100% 100%, rgba(16, 23, 48, 0.8), transparent);
-    background-attachment: fixed;
-  }
-
-  .dark.dark-royal-amethyst body {
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 85, 247, 0.14), transparent 70%),
-      radial-gradient(circle at 100% 100%, rgba(21, 18, 43, 0.8), transparent);
-    background-attachment: fixed;
+    background-image: none !important;
+    background-color: var(--bg-canvas) !important;
   }
 }
 
-/* Custom scrollbars with neon-tinged thumb in dark mode */
+/* ========================================================================== */
+/* DARK MODE CASCADE: Uniform surfaces without any light spots leaking */
+/* ========================================================================== */
+
+.dark .dark\:bg-\[\#141D2B\],
+.dark .dark\:bg-\[\#0F1726\],
+.dark .dark\:bg-\[\#111827\],
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-850 {
+  background-color: var(--bg-card) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+.dark .dark\:bg-slate-800\/80,
+.dark .dark\:bg-slate-800\/60,
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-850\/80,
+.dark .dark\:bg-slate-850\/60 {
+  background-color: var(--bg-card-subtle) !important;
+}
+
+.dark .dark\:border-slate-800,
+.dark .dark\:border-slate-750,
+.dark .dark\:border-slate-700 {
+  border-color: var(--border-soft) !important;
+}
+
+.dark .dark\:border-slate-700\/60,
+.dark .dark\:border-slate-800\/60 {
+  border-color: var(--border-subtle) !important;
+}
+
+.dark tr:hover,
+.dark .dark\:hover\:bg-slate-850\/50:hover,
+.dark .dark\:hover\:bg-slate-800\/50:hover,
+.dark .dark\:hover\:bg-slate-800\/60:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+.dark .dark\:bg-slate-900\/30,
+.dark .dark\:bg-slate-900\/40,
+.dark .dark\:bg-\[\#FDFBF7\] {
+  background-color: var(--bg-input) !important;
+}
+
+/* Form input focus enhancement */
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: var(--theme-accent) !important;
+  outline: none;
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -137,59 +192,3 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
-
-/* Animations for hover charging and magnetic glow */
-@keyframes hoverRingFill {
-  0% {
-    stroke-dashoffset: 100;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes hoverBreathingGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px var(--glow-color), 0 0 2px var(--glow-highlight);
-  }
-  50% {
-    box-shadow: 0 0 25px var(--glow-highlight), 0 0 8px var(--glow-color);
-  }
-}
-
-@keyframes shimmerGlint {
-  0% {
-    transform: translateX(-100%) rotate(25deg);
-  }
-  100% {
-    transform: translateX(200%) rotate(25deg);
-  }
-}
-
-.hover-glow-active {
-  animation: hoverBreathingGlow 1.8s infinite ease-in-out;
-}
-
-.theme-shimmer-sweep {
-  position: relative;
-  overflow: hidden;
-}
-
-.theme-shimmer-sweep::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    60deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.15) 30%,
-    transparent 40%
-  );
-  transform: rotate(25deg);
-  pointer-events: none;
-  animation: shimmerGlint 3s infinite ease-in-out;
-}
-

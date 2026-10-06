@@ -8,7 +8,7 @@ import {
   onValue
 } from 'firebase/database';
 import { rtdb, handleFirestoreError, OperationType } from './config';
-import { Patient, Doctor, Appointment, Billing, StaffUser, HospitalStaffRole, toDateObject } from '../types/hospital';
+import { Patient, Doctor, Appointment, Billing, StaffUser, HospitalStaffRole, toDateObject, DateLike } from '../types/hospital';
 
 // Helper to sanitize dates for Firebase Realtime Database
 const serializeDate = (dateVal: any): number => {
@@ -915,3 +915,62 @@ export const seedInitialStaffUsers = async (forceOverwrite: boolean = false): Pr
   return createdStaff;
 };
 
+// ==================== STAFF AUDIT LOGS & EMERGENCY RECOVERY ====================
+export interface StaffAuditLog {
+  id: string;
+  timestamp: DateLike;
+  action: 'LOGIN_SUCCESS' | 'LOGIN_FAILURE' | 'REGISTRATION' | 'PASSWORD_RESET' | 'EMERGENCY_ACCESS' | 'LOGOUT';
+  staffId?: string;
+  staffName?: string;
+  role?: string;
+  identifier?: string;
+  status: 'SUCCESS' | 'FAILURE';
+  notes?: string;
+}
+
+export const logStaffAuditEvent = async (
+  event: Omit<StaffAuditLog, 'id' | 'timestamp'>
+): Promise<string> => {
+  const path = 'staff_audit_logs';
+  try {
+    const logRef = push(ref(rtdb, path));
+    const payload = {
+      ...event,
+      timestamp: serializeDate(Date.now()),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 100) : 'Browser Terminal',
+    };
+    await set(logRef, payload);
+    return logRef.key!;
+  } catch (err) {
+    console.warn('Audit log write error:', err);
+    return '';
+  }
+};
+
+export const resetStaffPassword = async (
+  identifier: string,
+  newPasscode: string
+): Promise<StaffUser> => {
+  const clean = identifier.trim().toLowerCase();
+  const staff = await getStaffUsers();
+  const found = staff.find(
+    (s) => s.email.toLowerCase() === clean || s.employeeId.toLowerCase() === clean
+  );
+
+  if (!found) {
+    throw new Error(`No staff member found matching "${identifier}". Please check your email or badge ID.`);
+  }
+
+  await updateStaffUser(found.id, { password: newPasscode });
+  await logStaffAuditEvent({
+    action: 'PASSWORD_RESET',
+    staffId: found.id,
+    staffName: found.fullName,
+    role: found.role,
+    identifier,
+    status: 'SUCCESS',
+    notes: 'Passcode successfully reset via emergency staff workflow',
+  });
+
+  return { ...found, password: newPasscode };
+};

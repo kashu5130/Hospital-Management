@@ -87,7 +87,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         {/* Quick Dark Mode toggle button directly on mobile bottom bar */}
         <button
           onClick={toggleTheme}
-          onMouseEnter={() => hoverChangeTheme(isDark ? 'light' : 'dark')}
           className="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[#64748B] dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-300 transition-colors cursor-pointer min-w-[44px]"
           title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label="Toggle dark mode"

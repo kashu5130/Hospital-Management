@@ -14,7 +14,9 @@ import {
   AlertCircle,
   UserCheck,
   UserPlus,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { ActiveTab, StaffUser, HospitalStaffRole } from '../types/hospital';
 import { auth, safeSignInWithGoogle, signOut, ConnectionStatusResult, firebaseConfig } from '../firebase/config';
@@ -22,6 +24,7 @@ import { User } from 'firebase/auth';
 import { HOSPITAL_STAFF_ROLES } from '../data/staffRoles';
 import { getRoleIcon } from './StaffAuthModal';
 import { ThemeToggle } from './ThemeToggle';
+import { useTheme } from '../context/ThemeContext';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -64,6 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const [authErrorMessage, setAuthErrorMessage] = React.useState<string | null>(null);
+  const { isDark, toggleTheme, commitThemeChange } = useTheme();
 
   const navItems = [
     { id: 'dashboard' as ActiveTab, label: 'Dashboard', icon: LayoutDashboard },
@@ -170,18 +174,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom Section: Theme Switcher, Database status & Auth */}
         <div className="p-3 border-t border-[#F0ECE4] dark:border-slate-800 space-y-2.5">
           {/* Dark Mode Switcher inside sidebar */}
-          {(!collapsed || mobileOpen) && (
-            <div className="p-2.5 rounded-xl bg-[#F9F7F2] dark:bg-slate-850/80 border border-[#EAE6DF] dark:border-slate-800">
+          {(!collapsed || mobileOpen) ? (
+            <div className="p-2.5 rounded-xl bg-[#F9F7F2] dark:bg-[#141C2E] border border-[#EAE6DF] dark:border-slate-800">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">
-                  Theme Appearance
+                  Theme
                 </span>
-                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  Hover to switch
+                <span className="text-[10px] font-semibold text-[#5A7865] dark:text-emerald-400">
+                  {isDark ? 'Dark Mode' : 'Light Mode'}
                 </span>
               </div>
               <ThemeToggle variant="pill" showHoverHint={false} />
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-center p-2.5 rounded-xl bg-[#F9F7F2] dark:bg-[#141C2E] border border-[#EAE6DF] dark:border-slate-800 text-[#64748B] dark:text-slate-300 hover:text-[#5A7865] dark:hover:text-emerald-400 transition-colors cursor-pointer"
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle Theme"
+            >
+              {isDark ? <Moon className="w-4 h-4 text-emerald-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+            </button>
           )}
 
           {/* Quick Demo Data Seeder */}
